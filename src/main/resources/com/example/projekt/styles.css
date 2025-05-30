@@ -1,0 +1,109 @@
+
+
+/* Główne kolory aplikacji */
+.root {
+    -fx-primary: #ff6c03;
+    -fx-primary-dark: derive(-fx-primary, -20%);
+    -fx-secondary: #2d3436;
+    -fx-light-grey: #f1f2f6;
+    -fx-dark-grey: #636e72;
+}
+
+/* Nagłówek */
+.header {
+    -fx-padding: 10 15 10 15;
+    -fx-background-color: -fx-light-grey;
+}
+
+.title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary;
+}
+
+/* Tabela */
+.table-view {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+}
+
+.table-view .table-cell {
+    -fx-padding: 5 10 5 10;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: derive(-fx-primary, 90%);
+}
+
+/* Przyciski */
+.action-button {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+}
+
+.action-button:hover {
+    -fx-background-color: -fx-primary-dark;
+}
+
+#logoutButton {
+    -fx-background-color: -fx-dark-grey;
+}
+
+#logoutButton:hover {
+    -fx-background-color: derive(-fx-dark-grey, -10%);
+}
+
+/* Pola formularza */
+.text-field, .text-area, .combo-box {
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+    -fx-border-color: -fx-light-grey;
+    -fx-border-width: 1;
+}
+
+.text-field:focused, .text-area:focused, .combo-box:focused {
+    -fx-border-color: -fx-primary;
+}
+
+.spinner {
+    -fx-font-size: 13px;
+}
+
+.spinner .increment-arrow-button, .spinner .decrement-arrow-button {
+    -fx-background-color: -fx-primary;
+}
+
+/* Panel wyszukiwania */
+.search-panel {
+    -fx-background-color: -fx-light-grey;
+    -fx-padding: 10;
+    -fx-background-radius: 5;
+}
+
+/* Etykiety */
+.label {
+    -fx-font-size: 13px;
+}
+
+/* Komunikaty o błędach */
+.error-label {
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 12px;
+}
+
+/* Placeholder dla pustej tabeli */
+.table-view .placeholder {
+    -fx-background-color: white;
+}
+
+/* Separatory */
+.separator {
+    -fx-background-color: -fx-light-grey;
+}
