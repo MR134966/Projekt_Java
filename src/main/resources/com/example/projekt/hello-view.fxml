@@ -95,7 +95,7 @@
                     </columnConstraints>
 
                     <Label text="Tytuł:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <TextField fx:id="titleField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <TextField fx:id="titleField" promptText="np. Harry Potter" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                     <Label text="Rok:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                     <TextField fx:id="yearField" promptText="np. 2024" GridPane.columnIndex="1" GridPane.rowIndex="1" />
