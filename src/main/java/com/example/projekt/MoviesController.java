@@ -313,6 +313,33 @@ public class MoviesController {
             }
         }
     }
+    private boolean validateYearInput(String yearText) {
+        if (yearText == null || yearText.trim().isEmpty()) {
+            showAlert("Błąd walidacji", "Pole 'Rok' nie może być puste.");
+            return false;
+        }
+
+        int year;
+        try {
+            year = Integer.parseInt(yearText);
+        } catch (NumberFormatException e) {
+            showAlert("Błąd walidacji", "Pole 'Rok' musi być liczbą całkowitą.");
+            return false;
+        }
+
+        if (year <= 0) {
+            showAlert("Błąd walidacji", "Rok musi być liczbą dodatnią.");
+            return false;
+        }
+
+        int currentYear = java.time.Year.now().getValue();
+        if (year > currentYear) {
+            showAlert("Błąd walidacji", "Rok filmu nie może być większy niż rok bieżący (" + currentYear + ").");
+            return false;
+        }
+
+        return true;
+    }
 
     @FXML
     private void addFilm() {
@@ -328,17 +355,11 @@ public class MoviesController {
             showAlert("Błąd walidacji", "Pole 'Tytuł' musi być wypełnione.");
             return;
         }
-        if (yearStr.isEmpty()) {
-            showAlert("Błąd walidacji", "Pole 'Rok' musi być wypełnione.");
+        if (!validateYearInput(yearStr)) {
             return;
         }
-        int year;
-        try {
-            year = Integer.parseInt(yearStr);
-        } catch (NumberFormatException e) {
-            showAlert("Błąd formatu", "Pole 'Rok' musi być liczbą całkowitą.");
-            return;
-        }
+        int year = Integer.parseInt(yearStr);
+
 
         if (ratingStr.isEmpty()) {
             showAlert("Błąd walidacji", "Pole 'Ocena' musi być wypełnione.");
@@ -454,17 +475,11 @@ public class MoviesController {
             showAlert("Błąd walidacji", "Pole 'Tytuł' musi być wypełnione.");
             return;
         }
-        if (yearStr.isEmpty()) {
-            showAlert("Błąd walidacji", "Pole 'Rok' musi być wypełnione.");
+        if (!validateYearInput(yearStr)) {
             return;
         }
-        int year;
-        try {
-            year = Integer.parseInt(yearStr);
-        } catch (NumberFormatException e) {
-            showAlert("Błąd formatu", "Pole 'Rok' musi być liczbą całkowitą.");
-            return;
-        }
+        int year = Integer.parseInt(yearStr);
+
 
         if (ratingStr.isEmpty()) {
             showAlert("Błąd walidacji", "Pole 'Ocena' musi być wypełnione.");
