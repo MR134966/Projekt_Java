@@ -12,7 +12,7 @@ public class Director {
     private Integer id;
 
     @Column(nullable = false, unique = true)
-    private String name; // Imię i nazwisko reżysera
+    private String name;
 
     @OneToMany(mappedBy = "director", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Movie> movies;
@@ -45,6 +45,6 @@ public class Director {
 
     @Override
     public String toString() {
-        return name; // Ważne dla ComboBox
+        return name;
     }
 }
