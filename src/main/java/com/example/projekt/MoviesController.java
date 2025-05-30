@@ -44,7 +44,7 @@ public class MoviesController {
     @FXML
     private TableColumn<Movie, String> availabilityColumn;
     @FXML
-    private TableColumn<Movie, String> rentedByUserColumn; // NOWA DEKLARACJA KOLUMNY
+    private TableColumn<Movie, String> rentedByUserColumn;
 
     @FXML
     private TextField titleField, yearField, ratingField, searchField;
@@ -122,18 +122,18 @@ public class MoviesController {
         availabilityColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().isAvailable() ? "Dostępny" : "Wypożyczony"));
 
-        // USTAWIENIE NOWEJ KOLUMNY 'Wypożyczony przez'
+
         rentedByUserColumn.setCellValueFactory(cellData -> {
             Movie movie = cellData.getValue();
-            if (movie != null && !movie.isAvailable()) { // Jeśli film jest wypożyczony
+            if (movie != null && !movie.isAvailable()) {
                 EntityManager em = null;
                 try {
                     em = JPAUtil.createEntityManager();
-                    // Znajdź aktywne wypożyczenie dla tego filmu
+
                     TypedQuery<Rental> query = em.createQuery(
                             "SELECT r FROM Rental r WHERE r.movie = :movie AND r.returnDate IS NULL", Rental.class);
                     query.setParameter("movie", movie);
-                    // Użyj .setMaxResults(1) na wypadek, gdyby z jakiegoś powodu było wiele aktywnych wypożyczeń (co nie powinno się zdarzyć)
+
                     List<Rental> rentals = query.getResultList();
                     if (!rentals.isEmpty()) {
                         User user = rentals.get(0).getUser();
@@ -147,7 +147,7 @@ public class MoviesController {
                     }
                 }
             }
-            return new SimpleStringProperty("-"); // Film dostępny lub brak informacji
+            return new SimpleStringProperty("-");
         });
 
 
@@ -371,7 +371,7 @@ public class MoviesController {
         movie.setYear(year);
         movie.setRating(rating);
         movie.setNotes(notesText.isEmpty() ? null : notesText);
-        movie.setAvailable(true); // Newly added movies are available by default
+        movie.setAvailable(true);
 
         EntityManager em = null;
         EntityTransaction tx = null;
@@ -414,7 +414,7 @@ public class MoviesController {
             movies.add(movie);
             clearFormFields();
             showAlert("Sukces", "Film \"" + movie.getTitle() + "\" został pomyślnie dodany.");
-            // Po dodaniu filmu, odśwież widok, aby kolumna 'Wypożyczony przez' była aktualna
+
             loadMovies();
 
         } catch (Exception ex) {
@@ -560,7 +560,7 @@ public class MoviesController {
             }
             clearFormFields();
             showAlert("Sukces", "Film \"" + movieToUpdate.getTitle() + "\" został pomyślnie zaktualizowany.");
-            // Po edycji filmu, odśwież widok, aby kolumna 'Wypożyczony przez' była aktualna
+
             loadMovies();
 
         } catch (Exception ex) {
@@ -617,7 +617,7 @@ public class MoviesController {
                 movies.remove(selectedMovie);
                 clearFormFields();
                 showAlert("Sukces", "Film \"" + selectedMovie.getTitle() + "\" został usunięty.");
-                // Po usunięciu filmu, odśwież widok, aby kolumna 'Wypożyczony przez' była aktualna
+
                 loadMovies();
             } else {
                 showAlert("Błąd", "Nie znaleziono filmu do usunięcia. Mógł już zostać usunięty.");
@@ -815,36 +815,35 @@ public class MoviesController {
                 User userToDelete = em.find(User.class, selectedUser.getId());
                 if (userToDelete != null) {
 
-                    // --- KLUCZOWA ZMIANA TUTAJ: Aktualizacja statusu filmów przed usunięciem użytkownika ---
-                    // 1. Znajdź wszystkie aktywne wypożyczenia tego użytkownika
+
                     TypedQuery<Rental> activeRentalsQuery = em.createQuery(
                             "SELECT r FROM Rental r WHERE r.user = :user AND r.returnDate IS NULL", Rental.class);
                     activeRentalsQuery.setParameter("user", userToDelete);
                     List<Rental> activeRentals = activeRentalsQuery.getResultList();
 
-                    // 2. Dla każdego aktywnego wypożyczenia, ustaw status powiązanego filmu na 'Dostępny'
+
                     for (Rental rental : activeRentals) {
                         Movie rentedMovie = rental.getMovie();
                         if (rentedMovie != null) {
-                            rentedMovie.setAvailable(true); // Ustaw film jako dostępny
-                            em.merge(rentedMovie); // Zapisz zmiany w filmie
+                            rentedMovie.setAvailable(true);
+                            em.merge(rentedMovie);
                             System.out.println("Film \"" + rentedMovie.getTitle() + "\" zmieniono na dostępny.");
                         }
                     }
-                    // --- KONIEC KLUCZOWEJ ZMIANY ---
 
-                    em.remove(userToDelete); // Usuń użytkownika (co kaskadowo usunie rekordy w rentals)
+
+                    em.remove(userToDelete);
                     transaction.commit();
 
                     showAlert("Sukces", "Użytkownik '" + selectedUser.getUsername() + "' został pomyślnie usunięty.");
 
-                    loadUsers();   // Odśwież listę użytkowników w UI
-                    loadMovies();  // Odśwież listę filmów w UI (teraz powinny pokazać poprawny status)
+                    loadUsers();
+                    loadMovies();
 
                 } else {
                     showAlert("Błąd", "Nie znaleziono użytkownika do usunięcia. Mógł już zostać usunięty.");
                     if (transaction != null) transaction.rollback();
-                    // loadUsers(); // Brak potrzeby ponownego ładowania, jeśli użytkownik nie został znaleziony do usunięcia
+
                 }
             } catch (Exception e) {
                 if (transaction != null) {
@@ -875,14 +874,11 @@ public class MoviesController {
         try {
             em = JPAUtil.createEntityManager();
             List<Movie> movies = em.createQuery("SELECT m FROM Movie m", Movie.class).getResultList();
-            // Przejdź przez listę filmów i zaktualizuj ich status na podstawie rentals
-            // LUB
-            // Upewnij się, że encja Movie ma odpowiednią logikę w getterze getIsAvailable()
-            // lub że pole 'is_available' w bazie jest poprawnie aktualizowane.
 
-            moviesList.clear(); // moviesList to ObservableList<Movie> podłączona do TableView
+
+            moviesList.clear();
             moviesList.addAll(movies);
-            moviesTable.setItems(moviesList); // Upewnij się, że TableView jest odświeżone
+            moviesTable.setItems(moviesList);
 
         } catch (Exception e) {
             e.printStackTrace();
