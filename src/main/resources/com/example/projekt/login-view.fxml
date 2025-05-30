@@ -19,11 +19,9 @@
                     <Font size="30.0" />
                 </font>
             <graphic>
-               <ImageView fitHeight="115.0" fitWidth="114.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
-                     <Image url="@../../../img/FraMe.png" />
-                  </image>
-               </ImageView>
+                <ImageView fitHeight="84.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../../../img/FraMe.png" />
+                </ImageView>
             </graphic>
             <VBox.margin>
                <Insets />
