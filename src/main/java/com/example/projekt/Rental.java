@@ -1,18 +1,18 @@
 package com.example.projekt;
 
-import jakarta.persistence.*; // Upewnij się, że importujesz właściwe pakiety JPA
+import jakarta.persistence.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.time.LocalDate;
 
-@Entity // <--- TO JEST KLUCZOWE! MUSI BYĆ TA ADNOTACJA!
-@Table(name = "rentals") // Opcjonalnie, jeśli nazwa tabeli jest inna niż 'rentals'
+@Entity
+@Table(name = "rentals")
 public class Rental {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Jeśli w bazie masz 'serial', Long jest zazwyczaj dobrym typem w Javie
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id", nullable = false)
@@ -31,10 +31,10 @@ public class Rental {
     @Column(name = "return_date")
     private LocalDate returnDate; // Może być NULL
 
-    // Konstruktory (jeśli masz inne, zostaw je)
+
     public Rental() {}
 
-    // Gettery i Settery (upewnij się, że masz wszystkie, w tym dla movie i user)
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Movie getMovie() { return movie; }
