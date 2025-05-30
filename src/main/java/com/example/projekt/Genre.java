@@ -45,6 +45,6 @@ public class Genre {
 
     @Override
     public String toString() {
-        return name; // Ważne dla ComboBox
+        return name;
     }
 }
