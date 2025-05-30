@@ -16,24 +16,24 @@ public class HibernateUtil {
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
-                // Tworzenie rejestru z pliku konfiguracyjnego
+
                 registry = new StandardServiceRegistryBuilder()
-                        .configure() // załaduj hibernate.cfg.xml
+                        .configure()
                         .build();
 
-                // Tworzenie źródeł metadanych
+
                 MetadataSources sources = new MetadataSources(registry);
                 
-                // Dodawanie klas encji
+
                 sources.addAnnotatedClass(Movie.class);
                 sources.addAnnotatedClass(User.class);
                 sources.addAnnotatedClass(Genre.class);
                 sources.addAnnotatedClass(Director.class);
 
-                // Budowanie metadanych
+
                 Metadata metadata = sources.getMetadataBuilder().build();
                 
-                // Tworzenie fabryki sesji
+
                 sessionFactory = metadata.getSessionFactoryBuilder().build();
 
             } catch (Exception e) {
