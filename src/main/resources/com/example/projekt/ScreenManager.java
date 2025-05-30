@@ -42,28 +42,27 @@ public class ScreenManager {
             if (event != null && event.getSource() instanceof Node) {
                 stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             } else if (primaryStage != null) {
-                stage = primaryStage; // Użyj primaryStage, jeśli event nie dostarcza źródła
+                stage = primaryStage;
             } else {
                 System.err.println("Nie można uzyskać Stage do zmiany sceny: primaryStage nie jest ustawione, a event jest null lub nie pochodzi od Node.");
                 return;
             }
 
-            ResourceBundle bundle = ResourceBundle.getBundle("messages", Locale.forLanguageTag("pl")); // Użyj Locale.forLanguageTag dla spójności
+            ResourceBundle bundle = ResourceBundle.getBundle("messages", Locale.forLanguageTag("pl"));
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile), bundle);
             Parent root = loader.load();
 
             Object controller = loader.getController();
 
-            // Przekazywanie currentUser do odpowiednich kontrolerów
+
             if (controller instanceof MoviesController && currentUser != null) {
-                // Sprawdzamy, czy fxmlFile odpowiada widokowi filmów, aby uniknąć niepotrzebnego rzutowania
-                // lub upewnij się, że tylko MoviesController potrzebuje currentUser w ten sposób
-                if ("/com/example/projekt/hello-view.fxml".equals(fxmlFile)) { // Dostosuj ścieżkę, jeśli jest inna
+
+
+                if ("/com/example/projekt/hello-view.fxml".equals(fxmlFile)) {
                      ((MoviesController) controller).setCurrentUser(currentUser);
                 }
             }
-            // Można dodać inne warunki `else if` dla innych kontrolerów, jeśli potrzebują currentUser
-            // np. if (controller instanceof UserProfileController && currentUser != null) { ... }
+
 
 
             Scene scene = new Scene(root);
@@ -77,7 +76,7 @@ public class ScreenManager {
             stage.setScene(scene);
             if (windowTitleKey != null && bundle.containsKey(windowTitleKey)) {
                 stage.setTitle(bundle.getString(windowTitleKey));
-            } else if (bundle.containsKey("window.title")) { // Domyślny tytuł
+            } else if (bundle.containsKey("window.title")) {
                 stage.setTitle(bundle.getString("window.title"));
             }
             stage.show();
@@ -85,7 +84,7 @@ public class ScreenManager {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Błąd ładowania widoku", "Nie można załadować widoku: " + fxmlFile, "Szczegóły: " + e.getMessage());
-        } catch (IllegalStateException e) { // Obsługa błędu, jeśli getResource zwróci null
+        } catch (IllegalStateException e) {
             e.printStackTrace();
             showAlert("Błąd zasobu", "Nie można znaleźć pliku FXML: " + fxmlFile, "Szczegóły: " + e.getMessage());
         }
@@ -96,7 +95,7 @@ public class ScreenManager {
     }
 
     public void switchToMoviesView(ActionEvent event, User currentUser) {
-        // Upewnij się, że ścieżka do hello-view.fxml jest poprawna
+
         loadAndSetScene("/com/example/projekt/hello-view.fxml", event, "window.title.movies", currentUser);
     }
 
