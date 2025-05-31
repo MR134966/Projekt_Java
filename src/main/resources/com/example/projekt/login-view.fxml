@@ -16,7 +16,7 @@
         <VBox alignment="CENTER" spacing="10.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
             <Label alignment="CENTER" contentDisplay="RIGHT" prefHeight="150.0" prefWidth="627.0" style="-fx-font-weight: bold;" text="Logowanie ">
                 <font>
-                    <Font size="30.0" />
+                    <Font size="48.0" />
                 </font>
             <graphic>
                 <ImageView fitHeight="84.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">

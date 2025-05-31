@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -75,6 +76,8 @@ public class ClientController {
     private TableColumn<Rental, String> rentedTitleColumn;
     @FXML
     private TableColumn<Rental, LocalDate> rentedReturnDateColumn;
+    @FXML
+    private Button changePasswordButton;
 
     private User currentUser;
     private ObservableList<Movie> masterMovieList = FXCollections.observableArrayList();
@@ -430,6 +433,43 @@ public class ClientController {
             }
         }
     }
+    @FXML
+    private void handleChangePassword() {
+        if (currentUser == null) {
+            showAlert(Alert.AlertType.WARNING, "Błąd", "Brak zalogowanego użytkownika.");
+            return;
+        }
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/example/projekt/password-change-view.fxml"));
+            Parent parent = fxmlLoader.load();
+
+            PasswordChangeController passwordChangeController = fxmlLoader.getController();
+
+            Stage stage = new Stage();
+            stage.setTitle("Zmień Hasło");
+            stage.setScene(new Scene(parent));
+
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(changePasswordButton.getScene().getWindow());
+
+            passwordChangeController.setCurrentUser(currentUser);
+            passwordChangeController.setDialogStage(stage);
+
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            statusLabel.setText("Błąd podczas ładowania okna zmiany hasła: " + e.getMessage());
+        }
+    }
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
     @FXML
     private void handleLogout(ActionEvent event) {
@@ -475,11 +515,4 @@ public class ClientController {
     }
 
 
-    @FXML
-    private void handleReset() {
-        clearMovieDetails();
-        moviesTable.getSelectionModel().clearSelection();
-        rentedMoviesTable.getSelectionModel().clearSelection();
-        statusLabel.setText("");
-    }
 }

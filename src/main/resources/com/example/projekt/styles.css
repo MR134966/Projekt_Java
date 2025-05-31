@@ -89,7 +89,7 @@
 
 /* Etykiety */
 .label {
-    -fx-font-size: 13px;
+    -fx-font-size: 15px;
 }
 
 /* Komunikaty o błędach */
@@ -106,4 +106,10 @@
 /* Separatory */
 .separator {
     -fx-background-color: -fx-light-grey;
+}
+/* Napis dialogu */
+.dialog-title-large {
+    -fx-font-size: 18pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
 }

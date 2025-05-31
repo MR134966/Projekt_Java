@@ -36,6 +36,7 @@
             </graphic></Label>
             <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="userLabel" text="Zalogowano: Użytkownik" />
+            <Button fx:id="changePasswordButton" onAction="#handleChangePassword" text="Zmień Hasło" />
             <Button fx:id="logoutButton" onAction="#handleLogout" text="Wyloguj" />
         </HBox>
         <Separator />
