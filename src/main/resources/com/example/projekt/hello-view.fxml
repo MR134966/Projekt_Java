@@ -27,7 +27,7 @@
             <padding>
                 <Insets bottom="10" left="15" right="15" top="10" />
             </padding>
-            <Label prefHeight="29.0" prefWidth="139.0" styleClass="title" text="FrameKeeper">
+            <Label prefHeight="46.0" prefWidth="194.0" styleClass="title" text="FrameKeeper">
             <graphic>
                <ImageView fitHeight="46.0" fitWidth="52.0" pickOnBounds="true" preserveRatio="true">
                   <image>
