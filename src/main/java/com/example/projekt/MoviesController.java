@@ -730,7 +730,8 @@ public class MoviesController {
         dialog.setHeaderText("Wprowadź dane nowego użytkownika");
 
         ButtonType addButtonType = new ButtonType("Dodaj", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+        ButtonType cancelButtonType = new ButtonType("Anuluj", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, cancelButtonType);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
