@@ -27,20 +27,20 @@
             <padding>
                 <Insets bottom="10" left="15" right="15" top="10" />
             </padding>
-            <Label prefHeight="46.0" prefWidth="194.0" styleClass="title" text="FrameKeeper">
-            <graphic>
-               <ImageView fitHeight="46.0" fitWidth="52.0" pickOnBounds="true" preserveRatio="true">
-                  <image>
-                     <Image url="@../../../img/FraMe.png" />
-                  </image>
-               </ImageView>
-            </graphic></Label>
+            <Label styleClass="title" text="FrameKeeper">
+                <graphic>
+                    <ImageView fitHeight="46.0" fitWidth="52.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@../../../img/FraMe.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+            </Label>
             <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="userLabel" text="Zalogowano: admin" />
             <Button fx:id="logoutButton" onAction="#handleLogout" text="Wyloguj" />
         </HBox>
         <Separator />
-
 
         <SplitPane dividerPositions="0.65" VBox.vgrow="ALWAYS">
 
@@ -48,15 +48,14 @@
                 <padding>
                     <Insets bottom="5" left="5" right="5" top="5" />
                 </padding>
-                <TableView fx:id="moviesTable" VBox.vgrow="ALWAYS">
+                <TableView fx:id="moviesTable" styleClass="table-view" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="titleColumn" minWidth="150" prefWidth="200" text="Tytuł" />
                         <TableColumn fx:id="yearColumn" minWidth="60" prefWidth="70" text="Rok" />
                         <TableColumn fx:id="genreColumn" minWidth="100" prefWidth="120" text="Gatunek" />
                         <TableColumn fx:id="directorColumn" minWidth="100" prefWidth="150" text="Reżyser" />
                         <TableColumn fx:id="ratingColumn" minWidth="50" prefWidth="60" text="Ocena" />
-                        <TableColumn fx:id="notesColumn" prefWidth="150.0" text="%movie.notes" />
-                        <TableColumn fx:id="availabilityColumn" minWidth="80" prefWidth="100" text="Dostępność" />
+                        <TableColumn fx:id="notesColumn" prefWidth="150.0" text="Opis" /> <TableColumn fx:id="availabilityColumn" minWidth="80" prefWidth="100" text="Dostępność" />
                         <TableColumn fx:id="rentedByUserColumn" prefWidth="120.0" text="Wypożyczony przez" />
                     </columns>
                     <columnResizePolicy>
@@ -73,72 +72,64 @@
                         <Insets bottom="10" left="10" right="10" top="10" />
                     </padding>
                     <Label text="Filtruj:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <TextField fx:id="searchField" promptText="Wyszukaj po tytule..." GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <TextField fx:id="searchField" promptText="Wyszukaj po tytule..." styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                     <Label text="Gatunek:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                    <ComboBox fx:id="filterGenreComboBox" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
+                    <ComboBox fx:id="filterGenreComboBox" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
                 </GridPane>
             </VBox>
 
-
-            <VBox spacing="10">
-                <padding>
-                    <Insets bottom="10" left="10" right="10" top="10" />
-                </padding>
-                <GridPane hgap="10" vgap="8">
-                    <columnConstraints>
-                        <ColumnConstraints minWidth="70" />
-                        <ColumnConstraints hgrow="ALWAYS" />
-                    </columnConstraints>
+            <VBox spacing="10" styleClass="content-panel"> <padding>
+                <Insets bottom="10" left="10" right="10" top="10" />
+            </padding>
+                <GridPane hgap="10" vgap="8" styleClass="grid-pane"> <columnConstraints>
+                    <ColumnConstraints minWidth="70" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
 
                     <Label text="Tytuł:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <TextField fx:id="titleField" promptText="np. Harry Potter" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <TextField fx:id="titleField" promptText="np. Harry Potter" styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                     <Label text="Rok:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                    <TextField fx:id="yearField" promptText="np. 2024" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <TextField fx:id="yearField" promptText="np. 2024" styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                     <Label text="Gatunek:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                    <ComboBox fx:id="genreComboBox" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <ComboBox fx:id="genreComboBox" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                     <Label text="Reżyser:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                    <ComboBox fx:id="directorComboBox" editable="true" maxWidth="Infinity" promptText="Wybierz lub wpisz nowego" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <ComboBox fx:id="directorComboBox" editable="true" maxWidth="Infinity" promptText="Wybierz lub wpisz nowego" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                     <Label text="Ocena:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                    <TextField fx:id="ratingField" promptText="0.0 - 10.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    <TextField fx:id="ratingField" promptText="0.0 - 10.0" styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-                    <Label text="%movie.notes" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.valignment="TOP" />
-                    <TextArea fx:id="notesField" prefRowCount="4" promptText="%movie.notes.prompt" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-
-
-                    <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="6">
+                    <Label text="Opis" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.valignment="TOP" /> <TextArea fx:id="notesField" prefRowCount="4" promptText="Dodaj opis filmu..." wrapText="true" styleClass="text-area" GridPane.columnIndex="1" GridPane.rowIndex="5" /> <HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="6">
                         <padding>
                             <Insets top="15" />
                         </padding>
                         <Button fx:id="addButton" onAction="#addFilm" styleClass="action-button" text="Dodaj" />
                         <Button fx:id="editButton" disable="true" onAction="#handleEdit" styleClass="action-button" text="Edytuj" />
                         <Button fx:id="deleteButton" disable="true" onAction="#handleDelete" styleClass="action-button" text="Usuń" />
-                        <Button fx:id="resetButton" onAction="#handleReset" styleClass="action-button" text="Wyczyść" />
-                    </HBox>
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
+                        <Button fx:id="resetButton" onAction="#handleReset" styleClass="button" text="Wyczyść" /> </HBox>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
                 </GridPane>
+
                 <Label style="-fx-font-weight: bold;" text="Użytkownicy:" />
-                <TableView fx:id="usersTable" prefHeight="150" prefWidth="400">
-                    <columns>
-                        <TableColumn fx:id="userIdColumn" prefWidth="50" text="ID" />
-                        <TableColumn fx:id="usernameColumn" prefWidth="150" text="Nazwa" />
-                        <TableColumn fx:id="passwordColumn" prefWidth="150" text="Hasło" />
-                    </columns>
+                <TableView fx:id="usersTable" prefHeight="150" prefWidth="400" styleClass="table-view"> <columns>
+                    <TableColumn fx:id="userIdColumn" prefWidth="50" text="ID" />
+                    <TableColumn fx:id="usernameColumn" prefWidth="150" text="Nazwa" />
+                    <TableColumn fx:id="passwordColumn" prefWidth="150" text="Hasło" />
+                </columns>
                 </TableView>
                 <HBox alignment="CENTER_RIGHT" spacing="10">
                     <padding>

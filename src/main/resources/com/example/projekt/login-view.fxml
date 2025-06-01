@@ -11,45 +11,40 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="523.0" prefWidth="728.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.projekt.LoginController">
+<AnchorPane prefHeight="523.0" prefWidth="728.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.projekt.LoginController">
     <children>
-        <VBox alignment="CENTER" spacing="10.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="50.0">
-            <Label alignment="CENTER" contentDisplay="RIGHT" prefHeight="150.0" prefWidth="627.0" style="-fx-font-weight: bold;" text="Logowanie ">
-                <font>
-                    <Font size="48.0" />
-                </font>
-            <graphic>
-                <ImageView fitHeight="84.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@../../../img/FraMe.png" />
-                </ImageView>
-            </graphic>
-            <VBox.margin>
-               <Insets />
-            </VBox.margin>
+        <VBox alignment="CENTER" spacing="10.0" styleClass="content-panel" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="100.0">
+            <padding>
+                <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+            </padding>
+            <Label alignment="CENTER" contentDisplay="RIGHT" styleClass="title" text="Logowanie">
+                <graphic>
+                    <ImageView fitHeight="84.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../../../img/FraMe.png" />
+                    </ImageView>
+                </graphic>
+                <VBox.margin>
+                    <Insets bottom="20.0" />
+                </VBox.margin>
             </Label>
-            <TextField fx:id="usernameField" promptText="Nazwa użytkownika">
-            <font>
-               <Font size="13.0" />
-            </font></TextField>
-            <PasswordField fx:id="passwordField" promptText="Hasło">
-            <font>
-               <Font size="13.0" />
-            </font></PasswordField>
-            <Button defaultButton="true" onAction="#handleLogin" prefHeight="32.0" prefWidth="71.0" text="Zaloguj">
-            <font>
-               <Font size="14.0" />
-            </font></Button>
-            <Button onAction="#handleExit" prefHeight="32.0" prefWidth="71.0" text="Wyjście">
-               <font>
-                  <Font size="14.0" />
-               </font>
+            <TextField fx:id="usernameField" promptText="Nazwa użytkownika" styleClass="text-field" />
+            <PasswordField fx:id="passwordField" promptText="Hasło" styleClass="password-field" />
+            <Button defaultButton="true" onAction="#handleLogin" styleClass="action-button" text="Zaloguj">
+                <VBox.margin>
+                    <Insets top="20.0" />
+                </VBox.margin>
             </Button>
-            <Label fx:id="errorLabel" textFill="red" />
+            <Button onAction="#handleExit" styleClass="button" text="Wyjście" />
+            <Label fx:id="errorLabel" styleClass="error-label" />
         </VBox>
-      <Label alignment="CENTER" contentDisplay="CENTER" graphicTextGap="3.0" layoutX="91.0" layoutY="-35.2" opacity="0.88" prefHeight="97.0" prefWidth="644.0" style="-fx-font-weight: bold;" text="System Zarządzania Kolekcją Filmów &quot;FrameKeeper&quot;" textAlignment="CENTER" textFill="#ff8000" underline="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <font>
-            <Font size="28.0" />
-         </font>
-      </Label>
+
+        <Label alignment="CENTER" contentDisplay="CENTER" graphicTextGap="3.0" layoutX="0.0" layoutY="0.0" opacity="0.88" prefHeight="97.0" prefWidth="728.0" style="-fx-font-weight: bold; -fx-text-fill: -fx-primary-color; -fx-font-size: 28px;" text="System Zarządzania Kolekcją Filmów &quot;FrameKeeper&quot;" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <font>
+                <Font size="28.0" />
+            </font>
+            <padding>
+                <Insets top="20.0" />
+            </padding>
+        </Label>
     </children>
 </AnchorPane>
