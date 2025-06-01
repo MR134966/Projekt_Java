@@ -11,17 +11,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Alert;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Optional;
 import java.util.Locale;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.TypedQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 public class MoviesController {
 
@@ -38,7 +35,6 @@ public class MoviesController {
     private TableColumn<Movie, String> directorColumn;
     @FXML
     private TableColumn<Movie, Float> ratingColumn;
-
     @FXML
     private TableColumn<Movie, String> notesColumn;
     @FXML
@@ -55,7 +51,7 @@ public class MoviesController {
     @FXML
     private TextArea notesField;
     @FXML
-    private Button  editButton, deleteButton, logoutButton;
+    private Button editButton, deleteButton, logoutButton;
     @FXML
     private Label userLabel;
     @FXML private TableView<User> usersTable;
@@ -106,7 +102,6 @@ public class MoviesController {
             }
             return new SimpleStringProperty("N/A");
         });
-
         directorColumn.setCellValueFactory(cellData -> {
             Movie movie = cellData.getValue();
             if (movie != null && movie.getDirector() != null) {
@@ -114,23 +109,20 @@ public class MoviesController {
             }
             return new SimpleStringProperty("N/A");
         });
-
         if (notesColumn != null) {
             notesColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
         }
 
         availabilityColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().isAvailable() ? "Dostępny" : "Wypożyczony"));
-
-
         rentedByUserColumn.setCellValueFactory(cellData -> {
             Movie movie = cellData.getValue();
             if (movie != null && !movie.isAvailable()) {
-                EntityManager em = null;
+                Session session = null;
                 try {
-                    em = JPAUtil.createEntityManager();
+                    session = HibernateUtil.getSessionFactory().openSession();
 
-                    TypedQuery<Rental> query = em.createQuery(
+                    Query<Rental> query = session.createQuery(
                             "SELECT r FROM Rental r WHERE r.movie = :movie AND r.returnDate IS NULL", Rental.class);
                     query.setParameter("movie", movie);
 
@@ -142,8 +134,8 @@ public class MoviesController {
                 } catch (Exception e) {
                     System.err.println("Błąd pobierania użytkownika dla filmu " + movie.getTitle() + ": " + e.getMessage());
                 } finally {
-                    if (em != null && em.isOpen()) {
-                        em.close();
+                    if (session != null && session.isOpen()) {
+                        session.close();
                     }
                 }
             }
@@ -155,15 +147,12 @@ public class MoviesController {
         sortedMovies = new SortedList<>(filteredMovies);
         sortedMovies.comparatorProperty().bind(moviesTable.comparatorProperty());
         moviesTable.setItems(sortedMovies);
-
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             updateFilterPredicate();
         });
-
         filterGenreComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             updateFilterPredicate();
         });
-
         loadGenres();
         loadDirectors();
 
@@ -178,7 +167,6 @@ public class MoviesController {
                 deleteButton.setDisable(true);
             }
         });
-
         genreComboBox.setItems(genres);
         genreComboBox.setConverter(new StringConverter<Genre>() {
             @Override
@@ -199,7 +187,6 @@ public class MoviesController {
             public Genre fromString(String string) { return null;}
         });
         directorComboBox.setItems(directors);
-
         if (currentUser == null) {
             loadMovies();
         }
@@ -210,7 +197,6 @@ public class MoviesController {
         usersTable.setItems(users);
 
         loadUsers();
-
         usersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             deleteUserButton.setDisable(newSelection == null);
         });
@@ -229,7 +215,8 @@ public class MoviesController {
 
     }
     private void updateFilterPredicate() {
-        String searchText = searchField.getText() == null ? "" : searchField.getText().toLowerCase().trim();
+        String searchText = searchField.getText() == null ?
+                "" : searchField.getText().toLowerCase().trim();
         Genre selectedGenre = filterGenreComboBox.getValue();
 
         filteredMovies.setPredicate(movie -> {
@@ -260,15 +247,13 @@ public class MoviesController {
     }
 
     private void loadMovies() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
+            session = HibernateUtil.getSessionFactory().openSession();
             List<Movie> movieList;
-
-            movieList = em.createQuery(
+            movieList = session.createQuery(
                             "SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.rentals r LEFT JOIN FETCH r.user ORDER BY m.title", Movie.class)
                     .getResultList();
-
             moviesTable.getSelectionModel().clearSelection();
 
             movies.setAll(movieList);
@@ -276,40 +261,40 @@ public class MoviesController {
             e.printStackTrace();
             showAlert("Błąd ładowania filmów", "Nie udało się załadować listy filmów: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
 
     private void loadGenres() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
-            List<Genre> genreList = em.createQuery("SELECT g FROM Genre g ORDER BY g.name", Genre.class).getResultList();
+            session = HibernateUtil.getSessionFactory().openSession();
+            List<Genre> genreList = session.createQuery("SELECT g FROM Genre g ORDER BY g.name", Genre.class).getResultList();
             genres.setAll(genreList);
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Błąd ładowania gatunków", "Nie udało się załadować listy gatunków: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
 
     private void loadDirectors() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
-            List<Director> directorList = em.createQuery("SELECT d FROM Director d ORDER BY d.name", Director.class).getResultList();
+            session = HibernateUtil.getSessionFactory().openSession();
+            List<Director> directorList = session.createQuery("SELECT d FROM Director d ORDER BY d.name", Director.class).getResultList();
             directors.setAll(directorList);
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Błąd ładowania reżyserów", "Nie udało się załadować listy reżyserów: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -359,8 +344,6 @@ public class MoviesController {
             return;
         }
         int year = Integer.parseInt(yearStr);
-
-
         if (ratingStr.isEmpty()) {
             showAlert("Błąd walidacji", "Pole 'Ocena' musi być wypełnione.");
             return;
@@ -394,21 +377,20 @@ public class MoviesController {
         movie.setNotes(notesText.isEmpty() ? null : notesText);
         movie.setAvailable(true);
 
-        EntityManager em = null;
-        EntityTransaction tx = null;
+        Session session = null;
+        Transaction tx = null;
         try {
-            em = JPAUtil.createEntityManager();
-            tx = em.getTransaction();
-            tx.begin();
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
 
             Director directorEntity = null;
             if (!directorInput.isEmpty()) {
-                TypedQuery<Director> query = em.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class);
+                Query<Director> query = session.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class);
                 query.setParameter("name", directorInput);
                 List<Director> existingDirectors = query.getResultList();
                 if (existingDirectors.isEmpty()) {
                     Director newDirector = new Director(directorInput);
-                    em.persist(newDirector);
+                    session.persist(newDirector);
                     directorEntity = newDirector;
                     if (!directors.contains(newDirector)) {
                         directors.add(newDirector);
@@ -417,7 +399,7 @@ public class MoviesController {
                     directorEntity = existingDirectors.get(0);
                 }
             } else if (selectedDirectorObject != null) {
-                directorEntity = em.merge(selectedDirectorObject);
+                directorEntity = (Director) session.merge(selectedDirectorObject);
             }
 
             if (directorEntity == null) {
@@ -426,10 +408,10 @@ public class MoviesController {
                 return;
             }
             movie.setDirector(directorEntity);
-            movie.setGenre(em.merge(selectedGenre));
-            movie.setUser(em.merge(currentUser));
+            movie.setGenre((Genre) session.merge(selectedGenre));
+            movie.setUser((User) session.merge(currentUser));
 
-            em.persist(movie);
+            session.persist(movie);
             tx.commit();
 
             movies.add(movie);
@@ -437,7 +419,6 @@ public class MoviesController {
             showAlert("Sukces", "Film \"" + movie.getTitle() + "\" został pomyślnie dodany.");
 
             loadMovies();
-
         } catch (Exception ex) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -445,8 +426,8 @@ public class MoviesController {
             ex.printStackTrace();
             showAlert("Błąd dodawania filmu", "Wystąpił błąd: " + ex.getMessage() + (ex.getCause() != null ? " Przyczyna: " + ex.getCause().getMessage() : ""));
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -479,8 +460,6 @@ public class MoviesController {
             return;
         }
         int year = Integer.parseInt(yearStr);
-
-
         if (ratingStr.isEmpty()) {
             showAlert("Błąd walidacji", "Pole 'Ocena' musi być wypełnione.");
             return;
@@ -507,14 +486,13 @@ public class MoviesController {
             return;
         }
 
-        EntityManager em = null;
-        EntityTransaction tx = null;
+        Session session = null;
+        Transaction tx = null;
         try {
-            em = JPAUtil.createEntityManager();
-            tx = em.getTransaction();
-            tx.begin();
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
 
-            Movie movieToUpdate = em.find(Movie.class, selectedMovie.getId());
+            Movie movieToUpdate = session.find(Movie.class, selectedMovie.getId());
             if (movieToUpdate == null) {
                 showAlert("Błąd", "Nie znaleziono filmu do edycji. Mógł zostać usunięty.");
                 if (tx.isActive()) tx.rollback();
@@ -535,9 +513,9 @@ public class MoviesController {
             Director directorEntity = null;
             if (!directorInput.isEmpty()) {
                 if (selectedDirectorObject != null && directorInput.equals(selectedDirectorObject.getName())) {
-                    directorEntity = em.merge(selectedDirectorObject);
+                    directorEntity = (Director) session.merge(selectedDirectorObject);
                 } else {
-                    TypedQuery<Director> query = em.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class);
+                    Query<Director> query = session.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class);
                     query.setParameter("name", directorInput);
                     Optional<Director> existingDirectorOpt = query.getResultList().stream().findFirst();
 
@@ -545,7 +523,7 @@ public class MoviesController {
                         directorEntity = existingDirectorOpt.get();
                     } else {
                         Director newDirector = new Director(directorInput);
-                        em.persist(newDirector);
+                        session.persist(newDirector);
                         directorEntity = newDirector;
                         if (!directors.contains(newDirector)) {
                             directors.add(newDirector);
@@ -553,7 +531,7 @@ public class MoviesController {
                     }
                 }
             } else if (selectedDirectorObject != null) {
-                directorEntity = em.merge(selectedDirectorObject);
+                directorEntity = (Director) session.merge(selectedDirectorObject);
             }
 
             if (directorEntity == null) {
@@ -562,11 +540,10 @@ public class MoviesController {
                 return;
             }
             movieToUpdate.setDirector(directorEntity);
-            movieToUpdate.setGenre(em.merge(selectedGenreObject));
+            movieToUpdate.setGenre((Genre) session.merge(selectedGenreObject));
 
-            em.merge(movieToUpdate);
+            session.merge(movieToUpdate);
             tx.commit();
-
             int index = movies.indexOf(selectedMovie);
             if (index != -1) {
                 movies.set(index, movieToUpdate);
@@ -577,7 +554,6 @@ public class MoviesController {
             showAlert("Sukces", "Film \"" + movieToUpdate.getTitle() + "\" został pomyślnie zaktualizowany.");
 
             loadMovies();
-
         } catch (Exception ex) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -585,8 +561,8 @@ public class MoviesController {
             ex.printStackTrace();
             showAlert("Błąd edycji filmu", "Wystąpił błąd: " + ex.getMessage() + (ex.getCause() != null ? " Przyczyna: " + ex.getCause().getMessage() : ""));
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -611,14 +587,13 @@ public class MoviesController {
             return;
         }
 
-        EntityManager em = null;
-        EntityTransaction tx = null;
+        Session session = null;
+        Transaction tx = null;
         try {
-            em = JPAUtil.createEntityManager();
-            tx = em.getTransaction();
-            tx.begin();
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
 
-            Movie movieToRemove = em.find(Movie.class, selectedMovie.getId());
+            Movie movieToRemove = session.find(Movie.class, selectedMovie.getId());
 
             if (movieToRemove != null) {
                 if (movieToRemove.getUser() == null || !movieToRemove.getUser().getId().equals(currentUser.getId())) {
@@ -626,7 +601,7 @@ public class MoviesController {
                     if(tx.isActive()) tx.rollback();
                     return;
                 }
-                em.remove(movieToRemove);
+                session.remove(movieToRemove);
                 tx.commit();
 
                 movies.remove(selectedMovie);
@@ -647,8 +622,8 @@ public class MoviesController {
             ex.printStackTrace();
             showAlert("Błąd usuwania filmu", "Wystąpił błąd: " + ex.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -697,7 +672,6 @@ public class MoviesController {
 
             javafx.stage.Stage stage = (javafx.stage.Stage) logoutButton.getScene().getWindow();
             javafx.scene.Scene scene = new javafx.scene.Scene(loginRoot);
-
             java.net.URL cssUrl = getClass().getResource("/com/example/projekt/styles.css");
             if (cssUrl != null) {
                 scene.getStylesheets().add(cssUrl.toExternalForm());
@@ -765,7 +739,6 @@ public class MoviesController {
             }
             return null;
         });
-
         Optional<User> result = dialog.showAndWait();
 
         result.ifPresent(newUser -> {
@@ -774,7 +747,7 @@ public class MoviesController {
             try {
                 transaction = session.beginTransaction();
 
-                TypedQuery<User> query = session.createQuery("FROM User WHERE username = :username", User.class);
+                Query<User> query = session.createQuery("FROM User WHERE username = :username", User.class);
                 query.setParameter("username", newUser.getUsername());
                 if (!query.getResultList().isEmpty()) {
                     showAlert("Błąd dodawania", "Użytkownik o nazwie '" + newUser.getUsername() + "' już istnieje.");
@@ -821,45 +794,38 @@ public class MoviesController {
         Optional<ButtonType> result = confirmationAlert.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.YES) {
-            EntityManager em = null;
-            EntityTransaction transaction = null;
+            Session session = null;
+            Transaction transaction = null;
             try {
-                em = JPAUtil.createEntityManager();
-                transaction = em.getTransaction();
-                transaction.begin();
+                session = HibernateUtil.getSessionFactory().openSession();
+                transaction = session.beginTransaction();
 
-                User userToDelete = em.find(User.class, selectedUser.getId());
+                User userToDelete = session.find(User.class, selectedUser.getId());
                 if (userToDelete != null) {
-
-
-                    TypedQuery<Rental> activeRentalsQuery = em.createQuery(
+                    Query<Rental> activeRentalsQuery = session.createQuery(
                             "SELECT r FROM Rental r WHERE r.user = :user AND r.returnDate IS NULL", Rental.class);
                     activeRentalsQuery.setParameter("user", userToDelete);
                     List<Rental> activeRentals = activeRentalsQuery.getResultList();
-
 
                     for (Rental rental : activeRentals) {
                         Movie rentedMovie = rental.getMovie();
                         if (rentedMovie != null) {
                             rentedMovie.setAvailable(true);
-                            em.merge(rentedMovie);
+                            session.merge(rentedMovie);
                             System.out.println("Film \"" + rentedMovie.getTitle() + "\" zmieniono na dostępny.");
                         }
                     }
 
-
-                    em.remove(userToDelete);
+                    session.remove(userToDelete);
                     transaction.commit();
 
                     showAlert("Sukces", "Użytkownik '" + selectedUser.getUsername() + "' został pomyślnie usunięty.");
 
                     loadUsers();
                     loadMovies();
-
                 } else {
                     showAlert("Błąd", "Nie znaleziono użytkownika do usunięcia. Mógł już zostać usunięty.");
                     if (transaction != null) transaction.rollback();
-
                 }
             } catch (Exception e) {
                 if (transaction != null) {
@@ -868,8 +834,8 @@ public class MoviesController {
                 e.printStackTrace();
                 showAlert("Błąd usuwania użytkownika", "Wystąpił błąd podczas usuwania użytkownika: " + e.getMessage());
             } finally {
-                if (em != null && em.isOpen()) {
-                    em.close();
+                if (session != null && session.isOpen()) {
+                    session.close();
                 }
             }
         }
@@ -886,22 +852,21 @@ public class MoviesController {
         alert.showAndWait();
     }
     public void updateMoviesTable() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
-            List<Movie> movies = em.createQuery("SELECT m FROM Movie m", Movie.class).getResultList();
+            session = HibernateUtil.getSessionFactory().openSession();
+            List<Movie> movies = session.createQuery("SELECT m FROM Movie m", Movie.class).getResultList();
 
 
             moviesList.clear();
             moviesList.addAll(movies);
             moviesTable.setItems(moviesList);
-
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Błąd", "Nie udało się załadować filmów: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }

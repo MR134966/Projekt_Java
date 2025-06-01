@@ -9,13 +9,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.TypedQuery;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
 import java.io.IOException;
+import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.net.URL;
 
 public class LoginController {
 
@@ -38,17 +39,13 @@ public class LoginController {
             return;
         }
 
-
         if (authenticate(username, password)) {
-
             try {
-
                 ResourceBundle bundle = ResourceBundle.getBundle("messages", Locale.forLanguageTag("pl"));
                 FXMLLoader loader;
                 String fxmlPath;
                 String appTitleKey;
                 Parent rootNode;
-
 
                 if (currentUser.getRole() != null && currentUser.getRole().equalsIgnoreCase("ADMIN")) {
                     fxmlPath = "/com/example/projekt/hello-view.fxml";
@@ -65,16 +62,13 @@ public class LoginController {
                     clientController.setCurrentUser(currentUser);
                     appTitleKey = "app.title.client";
                 } else {
-
                     errorLabel.setText("Brak uprawnień lub nieznana rola użytkownika.");
                     currentUser = null;
                     return;
                 }
 
-
                 Stage stage = (Stage) usernameField.getScene().getWindow();
                 Scene scene = new Scene(rootNode);
-
 
                 URL cssUrl = getClass().getResource("/com/example/projekt/styles.css");
                 if (cssUrl != null) {
@@ -82,7 +76,6 @@ public class LoginController {
                 } else {
                     System.err.println("OSTRZEŻENIE: Nie można znaleźć pliku CSS: styles.css. Upewnij się, że jest w src/main/resources/com/example/projekt/");
                 }
-
 
                 if (bundle.containsKey(appTitleKey)) {
                     stage.setTitle(bundle.getString(appTitleKey));
@@ -95,12 +88,10 @@ public class LoginController {
                 stage.show();
 
             } catch (IOException e) {
-
                 System.err.println("Błąd ładowania widoku FXML: " + e.getMessage());
                 e.printStackTrace();
                 errorLabel.setText("Wystąpił błąd podczas ładowania interfejsu użytkownika.");
             } catch (Exception e) {
-
                 System.err.println("Nieoczekiwany błąd po zalogowaniu: " + e.getMessage());
                 e.printStackTrace();
                 errorLabel.setText("Wystąpił nieoczekiwany błąd. Spróbuj ponownie.");
@@ -109,20 +100,23 @@ public class LoginController {
     }
 
     private boolean authenticate(String username, String plainPassword) {
-        EntityManager em = null;
-        try {
-            em = JPAUtil.createEntityManager();
+        Session session = null;
+        Transaction tx = null;
 
-            TypedQuery<User> query = em.createQuery(
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+
+            Query<User> query = session.createQuery(
                     "SELECT u FROM User u WHERE u.username = :username", User.class
             );
             query.setParameter("username", username);
 
+            User user = query.uniqueResult();
 
-            User user = query.getSingleResult();
+            tx.commit();
 
-
-            if (user.checkPassword(plainPassword)) {
+            if (user != null && user.checkPassword(plainPassword)) {
                 this.currentUser = user;
                 errorLabel.setText("");
                 return true;
@@ -131,21 +125,18 @@ public class LoginController {
                 this.currentUser = null;
                 return false;
             }
-        } catch (NoResultException e) {
-
-            errorLabel.setText("Nieprawidłowa nazwa użytkownika lub hasło.");
-            this.currentUser = null;
-            return false;
         } catch (Exception e) {
-
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             System.err.println("Błąd autentykacji: " + e.getMessage());
             e.printStackTrace();
             errorLabel.setText("Błąd bazy danych podczas logowania.");
             this.currentUser = null;
             return false;
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }

@@ -13,9 +13,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import javafx.event.ActionEvent;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.io.IOException;
 import java.net.URL;
@@ -160,17 +162,17 @@ public class ClientController {
 
 
     private void loadAllMovies() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
-            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m", Movie.class);
+            session = HibernateUtil.getSessionFactory().openSession();
+            Query<Movie> query = session.createQuery("SELECT m FROM Movie m", Movie.class);
             masterMovieList.setAll(query.getResultList());
         } catch (Exception e) {
             e.printStackTrace();
             statusLabel.setText("Błąd ładowania filmów: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -181,11 +183,11 @@ public class ClientController {
             System.err.println("currentUser is null in loadUserRentals. Cannot load rentals.");
             return;
         }
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
+            session = HibernateUtil.getSessionFactory().openSession();
 
-            TypedQuery<Rental> query = em.createQuery(
+            Query<Rental> query = session.createQuery(
                     "SELECT r FROM Rental r JOIN FETCH r.movie WHERE r.user = :user AND r.returnDate IS NULL", Rental.class);
             query.setParameter("user", currentUser);
             userRentalsList.setAll(query.getResultList());
@@ -194,8 +196,8 @@ public class ClientController {
             e.printStackTrace();
             statusLabel.setText("Błąd ładowania wypożyczonych filmów: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -261,11 +263,11 @@ public class ClientController {
 
 
     private void loadGenresToComboBox() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
+            session = HibernateUtil.getSessionFactory().openSession();
 
-            TypedQuery<Genre> query = em.createQuery("SELECT g FROM Genre g ORDER BY g.name", Genre.class);
+            Query<Genre> query = session.createQuery("SELECT g FROM Genre g ORDER BY g.name", Genre.class);
             ObservableList<String> genres = FXCollections.observableArrayList();
             for (Genre g : query.getResultList()) {
                 genres.add(g.getName());
@@ -278,19 +280,19 @@ public class ClientController {
             e.printStackTrace();
             statusLabel.setText("Błąd ładowania gatunków: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
 
 
     private void loadDirectorsToComboBox() {
-        EntityManager em = null;
+        Session session = null;
         try {
-            em = JPAUtil.createEntityManager();
+            session = HibernateUtil.getSessionFactory().openSession();
 
-            TypedQuery<Director> query = em.createQuery("SELECT d FROM Director d ORDER BY d.name", Director.class);
+            Query<Director> query = session.createQuery("SELECT d FROM Director d ORDER BY d.name", Director.class);
             ObservableList<String> directors = FXCollections.observableArrayList();
             for (Director d : query.getResultList()) {
                 directors.add(d.getName());
@@ -300,8 +302,8 @@ public class ClientController {
             e.printStackTrace();
             statusLabel.setText("Błąd ładowania reżyserów: " + e.getMessage());
         } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -329,30 +331,31 @@ public class ClientController {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            EntityManager em = null;
+            Session session = null;
+            Transaction transaction = null;
             try {
-                em = JPAUtil.createEntityManager();
-                em.getTransaction().begin();
+                session = HibernateUtil.getSessionFactory().openSession();
+                transaction = session.beginTransaction();
 
 
-                Movie managedMovie = em.find(Movie.class, selectedMovie.getId());
+                Movie managedMovie = session.find(Movie.class, selectedMovie.getId());
                 if (managedMovie == null) {
-                    throw new RuntimeException("Film nie znaleziony w kontekście JPA.");
+                    throw new RuntimeException("Film nie znaleziony w kontekście Hibernate.");
                 }
                 managedMovie.setAvailable(false);
-                em.merge(managedMovie);
+                session.merge(managedMovie);
 
 
                 Rental newRental = new Rental();
                 newRental.setMovie(managedMovie);
 
-                newRental.setUser(em.find(User.class, currentUser.getId()));
+                newRental.setUser(session.find(User.class, currentUser.getId()));
                 newRental.setRentalDate(LocalDate.now());
                 newRental.setExpectedReturnDate(LocalDate.now().plusDays(14));
 
-                em.persist(newRental);
+                session.persist(newRental);
 
-                em.getTransaction().commit();
+                transaction.commit();
 
                 statusLabel.setText("Film \"" + selectedMovie.getTitle() + "\" został wypożyczony pomyślnie!");
                 loadAllMovies();
@@ -360,14 +363,14 @@ public class ClientController {
                 clearMovieDetails();
 
             } catch (Exception e) {
-                if (em != null && em.getTransaction().isActive()) {
-                    em.getTransaction().rollback();
+                if (transaction != null && transaction.isActive()) {
+                    transaction.rollback();
                 }
                 e.printStackTrace();
                 statusLabel.setText("Błąd podczas wypożyczania filmu: " + e.getMessage());
             } finally {
-                if (em != null && em.isOpen()) {
-                    em.close();
+                if (session != null && session.isOpen()) {
+                    session.close();
                 }
             }
         }
@@ -393,27 +396,28 @@ public class ClientController {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            EntityManager em = null;
+            Session session = null;
+            Transaction transaction = null;
             try {
-                em = JPAUtil.createEntityManager();
-                em.getTransaction().begin();
+                session = HibernateUtil.getSessionFactory().openSession();
+                transaction = session.beginTransaction();
 
 
-                Rental managedRental = em.find(Rental.class, selectedRental.getId());
+                Rental managedRental = session.find(Rental.class, selectedRental.getId());
                 if (managedRental == null) {
-                    throw new RuntimeException("Wypożyczenie nie znalezione w kontekście JPA.");
+                    throw new RuntimeException("Wypożyczenie nie znalezione w kontekście Hibernate.");
                 }
                 Movie managedMovie = managedRental.getMovie();
 
 
                 managedRental.setReturnDate(LocalDate.now());
-                em.merge(managedRental);
+                session.merge(managedRental);
 
 
                 managedMovie.setAvailable(true);
-                em.merge(managedMovie);
+                session.merge(managedMovie);
 
-                em.getTransaction().commit();
+                transaction.commit();
 
                 statusLabel.setText("Film \"" + managedMovie.getTitle() + "\" został zwrócony pomyślnie!");
                 loadAllMovies();
@@ -421,14 +425,14 @@ public class ClientController {
                 clearMovieDetails();
 
             } catch (Exception e) {
-                if (em != null && em.getTransaction().isActive()) {
-                    em.getTransaction().rollback();
+                if (transaction != null && transaction.isActive()) {
+                    transaction.rollback();
                 }
                 e.printStackTrace();
                 statusLabel.setText("Błąd podczas zwracania filmu: " + e.getMessage());
             } finally {
-                if (em != null && em.isOpen()) {
-                    em.close();
+                if (session != null && session.isOpen()) {
+                    session.close();
                 }
             }
         }
@@ -513,6 +517,4 @@ public class ClientController {
             }
         }
     }
-
-
 }
