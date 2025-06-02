@@ -83,6 +83,9 @@ public class MoviesApp extends Application {
             primaryStage.setTitle("FrameKeeper");
         }
         primaryStage.setScene(scene);
+
+        primaryStage.setMaximized(true);
+
         primaryStage.show();
     }
 
