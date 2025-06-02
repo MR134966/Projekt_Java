@@ -156,6 +156,7 @@ public class MoviesController {
         loadGenres();
         loadDirectors();
 
+        //wpisywanie wartosci do textfiledów
         moviesTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 populateForm(newSelection);
@@ -168,6 +169,7 @@ public class MoviesController {
             }
         });
         genreComboBox.setItems(genres);
+        //Nie można tworzyć nowych gatunków
         genreComboBox.setConverter(new StringConverter<Genre>() {
             @Override
             public String toString(Genre genre) {
@@ -187,6 +189,7 @@ public class MoviesController {
             public Genre fromString(String string) { return null;}
         });
         directorComboBox.setItems(directors);
+        //zabezpieczenie gdy nie było użytkowników
         if (currentUser == null) {
             loadMovies();
         }
@@ -204,6 +207,7 @@ public class MoviesController {
 
     private void loadUsers() {
         Session session = HibernateUtil.getSessionFactory().openSession();
+        //czyszczenie pól users
         try {
             usersTable.getSelectionModel().clearSelection();
 
@@ -221,12 +225,12 @@ public class MoviesController {
 
         filteredMovies.setPredicate(movie -> {
             if (searchText.isEmpty() && selectedGenre == null) {
-                return true;
+                return true; //wszystkie filmy są widoczne, jeśli brak filtra
             }
 
             boolean matchesSearchText = true;
             if (!searchText.isEmpty()) {
-                matchesSearchText = movie.getTitle().toLowerCase().contains(searchText);
+                matchesSearchText = movie.getTitle().toLowerCase().contains(searchText); //sprawdzenie tytułu
             }
 
             boolean matchesGenre = true;
@@ -234,7 +238,7 @@ public class MoviesController {
                 matchesGenre = movie.getGenre() != null && movie.getGenre().equals(selectedGenre);
             }
 
-            return matchesSearchText && matchesGenre;
+            return matchesSearchText && matchesGenre; //film musi spełniać oba kryteria
         });
     }
 
@@ -243,7 +247,7 @@ public class MoviesController {
         if (userLabel != null) {
             userLabel.setText("Zalogowano: " + (user != null ? user.getUsername() : "Brak"));
         }
-        loadMovies();
+        loadMovies(); //Ładuje filmy po ustawieniu użytkownika
     }
 
     private void loadMovies() {
@@ -251,12 +255,13 @@ public class MoviesController {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             List<Movie> movieList;
+            //Pobieranie filmów z wypożyczeniami i użytikami
             movieList = session.createQuery(
                             "SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.rentals r LEFT JOIN FETCH r.user ORDER BY m.title", Movie.class)
                     .getResultList();
             moviesTable.getSelectionModel().clearSelection();
 
-            movies.setAll(movieList);
+            movies.setAll(movieList);//aktualizacja listy filmów
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Błąd ładowania filmów", "Nie udało się załadować listy filmów: " + e.getMessage());
@@ -328,6 +333,7 @@ public class MoviesController {
 
     @FXML
     private void addFilm() {
+        //Pobiera danych z formularza
         String title = titleField.getText().trim();
         String yearStr = yearField.getText().trim();
         String ratingStr = ratingField.getText().trim().replace(',', '.');
@@ -382,7 +388,7 @@ public class MoviesController {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-
+//sprawdzanie reżysera jeśli dodanie nowego
             Director directorEntity = null;
             if (!directorInput.isEmpty()) {
                 Query<Director> query = session.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class);
@@ -411,7 +417,7 @@ public class MoviesController {
             movie.setGenre((Genre) session.merge(selectedGenre));
             movie.setUser((User) session.merge(currentUser));
 
-            session.persist(movie);
+            session.persist(movie); //zapis filmu do bazy danych
             tx.commit();
 
             movies.add(movie);
@@ -627,7 +633,7 @@ public class MoviesController {
             }
         }
     }
-
+//wypełnieie formularza danymi Movie
     private void populateForm(Movie movie) {
         if (movie == null) {
             clearFormFields();
@@ -646,7 +652,7 @@ public class MoviesController {
             directorComboBox.getEditor().clear();
         }
     }
-
+//czyści pola formularza i wyłącza przyciski edit oraz delete
     private void clearFormFields() {
         titleField.clear();
         yearField.clear();
@@ -662,14 +668,15 @@ public class MoviesController {
         deleteButton.setDisable(true);
     }
 
+    //ustawia currentUser na null
     @FXML
     private void handleLogout() {
         this.currentUser = null;
         try {
             ResourceBundle bundle = ResourceBundle.getBundle("messages", java.util.Locale.forLanguageTag("pl"));
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/projekt/login-view.fxml"), bundle);
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/projekt/login-view.fxml"), bundle); //ładuje ponownie login-view
             javafx.scene.Parent loginRoot = loader.load();
-
+//scena na stage
             javafx.stage.Stage stage = (javafx.stage.Stage) logoutButton.getScene().getWindow();
             javafx.scene.Scene scene = new javafx.scene.Scene(loginRoot);
             java.net.URL cssUrl = getClass().getResource("/com/example/projekt/styles.css");
@@ -688,7 +695,7 @@ public class MoviesController {
             showAlert("Błąd wylogowania", "Nie udało się wrócić do ekranu logowania: " + ex.getMessage());
         }
     }
-
+//czyści pola i filtry
     @FXML
     private void handleReset() {
         clearFormFields();
@@ -755,7 +762,7 @@ public class MoviesController {
                     return;
                 }
 
-                session.persist(newUser);
+                session.persist(newUser);//odświeżenie
                 transaction.commit();
                 users.add(newUser);
                 showAlert("Sukces", "Użytkownik '" + newUser.getUsername() + "' został pomyślnie dodany.");
@@ -840,7 +847,7 @@ public class MoviesController {
             }
         }
     }
-
+//wyświetla okno dialogowe Alert ERROR i INFORMATION
     private void showAlert(String title, String content) {
         Alert alert = new Alert(AlertType.ERROR);
         if (title.equalsIgnoreCase("Sukces")) {
@@ -850,25 +857,6 @@ public class MoviesController {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
-    }
-    public void updateMoviesTable() {
-        Session session = null;
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            List<Movie> movies = session.createQuery("SELECT m FROM Movie m", Movie.class).getResultList();
-
-
-            moviesList.clear();
-            moviesList.addAll(movies);
-            moviesTable.setItems(moviesList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Błąd", "Nie udało się załadować filmów: " + e.getMessage());
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
     }
 
 }
