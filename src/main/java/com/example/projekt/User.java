@@ -32,14 +32,6 @@ public class User {
     }
 
 
-    public User(String username, String plainPassword, String role) {
-        this.username = username;
-
-        this.passwordHash = plainPassword;
-        this.role = role;
-    }
-
-
     public String getRole() {
         return role;
     }
